@@ -28,9 +28,12 @@ class BeachDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Name: ${beachDetails.name}', style: TextStyle(fontSize: 18)),
+                  Text('Name: ${beachDetails.name}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
                   Text('Location: ${beachDetails.location}', style: TextStyle(fontSize: 18)),
-                  // Add more details here as needed
+                  SizedBox(height: 10),
+                  Text('Description: ${beachDetails.description}', style: TextStyle(fontSize: 16)),
+                  // Add more details or visual elements if needed
                 ],
               ),
             );

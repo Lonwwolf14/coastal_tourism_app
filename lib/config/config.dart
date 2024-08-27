@@ -1,10 +1,7 @@
 // lib/config/config.dart
 
 class Config {
-  // Base URL for the INCOIS API
-  static const String baseUrl = 'https://api.incois.gov.in/';
-
-  // Endpoints
-  static const String beachesEndpoint = '${baseUrl}beaches';
-  static const String suitabilityEndpoint = '${baseUrl}suitability';
+  // Placeholder API endpoints
+  static const String beachesEndpoint = 'https://api.example.com/beaches'; // Replace with actual endpoint
+  static const String suitabilityEndpoint = 'https://api.example.com/suitability'; // Replace with actual endpoint
 }
