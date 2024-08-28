@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/beach.dart';
-import '../providers/beach_provider.dart';
 
 class BeachDetailScreen extends StatelessWidget {
   final Beach beach;
@@ -10,72 +10,63 @@ class BeachDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(beach.name)),
-      body: FutureBuilder<Beach>(
-        future: BeachProvider.fetchBeachDetails(beach.name),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            return BeachDetailsView(beach: snapshot.data!);
-          } else {
-            return const Center(child: Text('No details available'));
-          }
-        },
+      appBar: AppBar(
+        title: Text(beach.name),
+        backgroundColor: Colors.teal,
       ),
-    );
-  }
-}
-
-class BeachDetailsView extends StatelessWidget {
-  final Beach beach;
-
-  const BeachDetailsView({Key? key, required this.beach}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BeachDetailItem(title: 'Name', value: beach.name, titleStyle: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
-            BeachDetailItem(title: 'Location', value: beach.location, titleStyle: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            BeachDetailItem(title: 'Description', value: beach.description, titleStyle: Theme.of(context).textTheme.titleMedium),
-            // Add more details or visual elements as needed
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                beach.name,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.teal, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                beach.location,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              Text(
+                beach.description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.normal,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              SizedBox(
+                height: 300,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(beach.latitude, beach.longitude),
+                    zoom: 12,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: MarkerId(beach.name),
+                      position: LatLng(beach.latitude, beach.longitude),
+                      infoWindow: InfoWindow(
+                        title: beach.name,
+                        snippet: beach.location,
+                      ),
+                      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+                    ),
+                  },
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class BeachDetailItem extends StatelessWidget {
-  final String title;
-  final String value;
-  final TextStyle? titleStyle;
-
-  const BeachDetailItem({
-    Key? key,
-    required this.title,
-    required this.value,
-    this.titleStyle,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: titleStyle ?? Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text(value, style: Theme.of(context).textTheme.bodyLarge),
-      ],
     );
   }
 }

@@ -5,8 +5,8 @@ import '../providers/beach_provider.dart';
 import '../models/beach.dart';
 import 'notifications_screen.dart';
 import 'messages_screen.dart';
-import '../widgets/search_bar.dart';
-
+import 'profile_screen.dart'; // Import the new profile screen
+import 'widgets/search_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -116,6 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.messenger_sharp),
               label: 'Messages',
             ),
+            NavigationDestination(
+              icon: Icon(Icons.person), // Profile icon
+              label: 'Profile',
+            ),
           ],
         ),
       ),
@@ -143,6 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return const NotificationsScreen();
       case 2:
         return const MessagesScreen();
+      case 3: // Profile screen index
+        return const ProfileScreen(); // Navigate to ProfileScreen
       default:
         return Container();
     }
