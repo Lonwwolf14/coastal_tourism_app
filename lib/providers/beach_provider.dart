@@ -1,85 +1,82 @@
-// lib/providers/beach_provider.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/config.dart';
 import '../models/beach.dart';
 
 class BeachProvider {
-  // Fetch list of beaches (mock data for now)
+  static const _mockDelay = Duration(seconds: 2);
+
   static Future<List<Beach>> fetchBeaches() async {
-    // Mock data
-    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
+    if (Config.useMockData) {
+      return _fetchMockBeaches();
+    } else {
+      return _fetchRealBeaches();
+    } 
+  }
+
+  static Future<Beach> fetchBeachDetails(String name) async {
+    if (Config.useMockData) {
+      return _fetchMockBeachDetails(name);
+    } else {
+      return _fetchRealBeachDetails(name);
+    }
+  }
+
+  static Future<List<Beach>> _fetchMockBeaches() async {
+    await Future.delayed(_mockDelay);
     return [
       Beach(
         name: 'Goa Beach',
         location: 'Goa, India',
         description: 'A popular beach destination with vibrant nightlife.',
-        latitude: 15.2993, // Example coordinates
+        latitude: 15.2993,
         longitude: 74.1240,
       ),
       Beach(
         name: 'Kovalam Beach',
         location: 'Kerala, India',
         description: 'Known for its crescent-shaped beaches and serene atmosphere.',
-        latitude: 8.4076, // Example coordinates
+        latitude: 8.4076,
         longitude: 76.9828,
       ),
       Beach(
         name: 'Marina Beach',
         location: 'Chennai, India',
         description: 'One of the longest urban beaches in India, with a bustling atmosphere.',
-        latitude: 13.0520, // Example coordinates
+        latitude: 13.0520,
         longitude: 80.2555,
       ),
-      // Add more mock beaches here
     ];
+  }
 
-    // Uncomment when using real API
-    /*
+  static Future<List<Beach>> _fetchRealBeaches() async {
     final response = await http.get(Uri.parse(Config.beachesEndpoint));
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((item) => Beach(
-        name: item['name'],
-        location: item['location'],
-        description: item['description'] ?? '',
-        latitude: item['latitude'].toDouble(),
-        longitude: item['longitude'].toDouble(),
-      )).toList();
+      return data.map((item) => Beach.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load beaches');
     }
-    */
   }
 
-  // Fetch beach details (mock data for now)
-  static Future<Beach> fetchBeachDetails(String name) async {
-    // Mock data
-    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
+  static Future<Beach> _fetchMockBeachDetails(String name) async {
+    await Future.delayed(_mockDelay);
     return Beach(
       name: 'Goa Beach',
       location: 'Goa, India',
       description: 'A popular beach destination with vibrant nightlife.',
-      latitude: 15.2993, // Example coordinates
+      latitude: 15.2993,
       longitude: 74.1240,
     );
+  }
 
-    // Uncomment when using real API
-    /*
-    final response = await http.get(Uri.parse('${Config.beachesEndpoint}?name=$name'));
+  static Future<Beach> _fetchRealBeachDetails(String name) async {
+    final response = await http.get(Uri.parse('${Config.beachesEndpoint}/$name'));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return Beach(
-        name: data['name'],
-        location: data['location'],
-        description: data['description'] ?? '',
-        latitude: data['latitude'].toDouble(),
-        longitude: data['longitude'].toDouble(),
-      );
+      return Beach.fromJson(data);
     } else {
       throw Exception('Failed to fetch beach details');
     }
-    */
   }
 }
