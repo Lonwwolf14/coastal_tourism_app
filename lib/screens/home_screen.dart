@@ -121,7 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget getBodyContent(int index) {
-    final ThemeData theme = Theme.of(context);
     switch (index) {
       case 0:
         return FutureBuilder<List<Beach>>(
@@ -172,13 +171,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Text(
                     'Hello',
-                    style: theme.textTheme.bodyLarge!
-                        .copyWith(color: theme.colorScheme.onPrimary),
+                    style: Theme.of(context).textTheme.bodyLarge!
+                        .copyWith(color: Theme.of(context).colorScheme.onPrimary),
                   ),
                 ),
               );
@@ -189,13 +188,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.all(8.0),
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
                   'Hi!',
-                  style: theme.textTheme.bodyLarge!
-                      .copyWith(color: theme.colorScheme.onPrimary),
+                  style: Theme.of(context).textTheme.bodyLarge!
+                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
             );
