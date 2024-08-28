@@ -3,6 +3,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import '../providers/beach_provider.dart';
 import '../models/beach.dart';
+import 'notifications_screen.dart';
+import 'messages_screen.dart';
+import '../widgets/search_bar.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -31,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentLocation = locationData;
       });
     } catch (e) {
-      // Handle location error
       print('Could not get location: $e');
     }
   }
@@ -61,10 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.my_location),
               onPressed: () {
                 if (_currentLocation != null) {
-                  // Handle location action, e.g., show a map with the current location
                   print('Current location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}');
                 } else {
-                  // Show a message to the user
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Could not get current location')),
                   );
@@ -75,18 +76,19 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SearchBar(
-                hintText: 'Search beaches...',
-                onChanged: (query) {
-                  setState(() {
-                    searchQuery = query;
-                  });
-                },
-                leading: const Icon(Icons.search),
+            if (currentPageIndex == 0)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SearchBar(
+                  hintText: 'Search beaches...',
+                  onChanged: (query) {
+                    setState(() {
+                      searchQuery = query;
+                    });
+                  },
+                  leading: const Icon(Icons.search),
+                ),
               ),
-            ),
             Expanded(
               child: getBodyContent(currentPageIndex),
             ),
@@ -138,68 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         );
       case 1:
-        return const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 1'),
-                  subtitle: Text('This is a notification'),
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 2'),
-                  subtitle: Text('This is a notification'),
-                ),
-              ),
-            ],
-          ),
-        );
+        return const NotificationsScreen();
       case 2:
-        return ListView.builder(
-          reverse: true,
-          itemCount: 2,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  margin: const EdgeInsets.all(8.0),
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Text(
-                    'Hello',
-                    style: Theme.of(context).textTheme.bodyLarge!
-                        .copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                  ),
-                ),
-              );
-            }
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  'Hi!',
-                  style: Theme.of(context).textTheme.bodyLarge!
-                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                ),
-              ),
-            );
-          },
-        );
+        return const MessagesScreen();
       default:
         return Container();
     }
