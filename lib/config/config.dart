@@ -15,4 +15,7 @@ class Config {
 
   // API keys or tokens (if required)
   static const String apiKey = 'YOUR_API_KEY'; // Replace with your actual API key, if needed
+
+  // Mock data configuration
+  static const bool useMockData = true; // Add this line to enable mock data during testing
 }

@@ -11,7 +11,7 @@ class BeachProvider {
       return _fetchMockBeaches();
     } else {
       return _fetchRealBeaches();
-    } 
+    }
   }
 
   static Future<Beach> fetchBeachDetails(String name) async {
