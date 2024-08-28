@@ -1,3 +1,5 @@
+// lib/screens/beach_list_screen.dart
+
 import 'package:flutter/material.dart';
 import '../models/beach.dart';
 import '../providers/beach_provider.dart';
@@ -8,12 +10,15 @@ class BeachListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define a location parameter or obtain it dynamically
+    final String location = 'desired_location'; // Replace with actual location
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Beaches'),
       ),
       body: FutureBuilder<List<Beach>>(
-        future: BeachProvider.fetchBeaches(),
+        future: BeachProvider.fetchBeaches(location),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

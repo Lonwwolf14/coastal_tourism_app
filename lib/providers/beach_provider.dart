@@ -6,11 +6,11 @@ import '../models/beach.dart';
 class BeachProvider {
   static const _mockDelay = Duration(seconds: 2);
 
-  static Future<List<Beach>> fetchBeaches() async {
+  static Future<List<Beach>> fetchBeaches(String searchQuery) async {
     if (Config.useMockData) {
       return _fetchMockBeaches();
     } else {
-      return _fetchRealBeaches();
+      return _fetchRealBeaches(searchQuery);
     }
   }
 
@@ -49,8 +49,8 @@ class BeachProvider {
     ];
   }
 
-  static Future<List<Beach>> _fetchRealBeaches() async {
-    final response = await http.get(Uri.parse(Config.beachesEndpoint));
+  static Future<List<Beach>> _fetchRealBeaches(String searchQuery) async {
+    final response = await http.get(Uri.parse('${Config.beachesEndpoint}?search=$searchQuery'));
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((item) => Beach.fromJson(item)).toList();
