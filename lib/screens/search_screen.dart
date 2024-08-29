@@ -31,7 +31,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         Expanded(
           child: FutureBuilder<List<Beach>>(
-            future: BeachProvider.fetchBeaches(searchQuery),
+            future: BeachProvider.fetchBeaches(''), // Fetch all beaches initially
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -40,7 +40,21 @@ class _SearchScreenState extends State<SearchScreen> {
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Center(child: Text('No beaches found.'));
               } else {
-                return BeachListView(beaches: snapshot.data!);
+                // Filter the list of beaches based on the search query
+                final filteredBeaches = snapshot.data!.where((beach) {
+                  final queryLower = searchQuery.toLowerCase();
+                  final nameLower = beach.name.toLowerCase();
+                  final locationLower = beach.location.toLowerCase();
+                  return nameLower.contains(queryLower) || locationLower.contains(queryLower);
+                }).toList();
+
+                // If there are no matches and the search query is not empty
+                if (filteredBeaches.isEmpty && searchQuery.isNotEmpty) {
+                  return const Center(child: Text('No beaches matched your search.'));
+                }
+
+                // If there are matches or the query is empty, show the list
+                return BeachListView(beaches: filteredBeaches);
               }
             },
           ),
