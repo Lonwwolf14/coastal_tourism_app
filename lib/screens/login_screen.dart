@@ -13,18 +13,47 @@ class LoginScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Login Page',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              'Login',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
             ),
-            const SizedBox(height: 20),
-            // Add Login form fields here
+            const SizedBox(height: 16.0),
+
+            // Login Form
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16.0),
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 32.0),
+
             ElevatedButton(
               onPressed: () {
-                // Implement login functionality
+                // Add functionality to log in the user
               },
               child: const Text('Login'),
+            ),
+            const SizedBox(height: 16.0),
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/register');
+              },
+              child: const Text('Don\'t have an account? Register'),
             ),
           ],
         ),

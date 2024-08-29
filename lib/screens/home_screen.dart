@@ -50,7 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
       data: themeData,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Coastal Tourism App'),
+          title: Row(
+            children: [
+              Image.asset('/assets/Aldenaire.png', height: 40), // Add your logo here
+              const SizedBox(width: 10),
+              const Text('Coastal Tourism App'),
+            ],
+          ),
           actions: [
             IconButton(
               icon: Icon(isDark ? Icons.brightness_2_outlined : Icons.wb_sunny_outlined),
