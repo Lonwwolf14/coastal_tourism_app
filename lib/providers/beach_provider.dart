@@ -31,7 +31,7 @@ class BeachProvider {
         description: 'A popular beach destination with vibrant nightlife.',
         latitude: 15.2993,
         longitude: 74.1240,
-        imageUrl: 'https://example.com/goa_beach.jpg',
+        imageUrl: 'https://thumbs.dreamstime.com/b/tropical-sunny-beach-party-sunset-sun-umbrellas-lounge-chairs-goa-india-tropical-sunny-beach-party-sunset-goa-203861442.jpg',
       ),
       Beach(
         name: 'Kovalam Beach',
@@ -39,7 +39,7 @@ class BeachProvider {
         description: 'Known for its crescent-shaped beaches and serene atmosphere.',
         latitude: 8.4076,
         longitude: 76.9828,
-        imageUrl: 'https://example.com/kovalam_beach.jpg',
+        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSf9eu9K8mDlRB1gSWGpeNc1Mbp6CZY_sgTCg&s',
       ),
       Beach(
         name: 'Marina Beach',
@@ -213,7 +213,8 @@ class BeachProvider {
       location: 'Goa, India',
       description: 'A popular beach destination with vibrant nightlife.',
       latitude: 15.2993,
-      longitude: 74.1240, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmxdMhCQbQMjvN_s7bP86CcgWFrR80nBne1g&s',
+      longitude: 74.1240,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmxdMhCQbQMjvN_s7bP86CcgWFrR80nBne1g&s',
     );
   }
 

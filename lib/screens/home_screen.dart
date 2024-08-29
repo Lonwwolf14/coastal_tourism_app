@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
 import 'notifications_screen.dart';
 import 'messages_screen.dart';
 import 'profile_screen.dart';
@@ -7,6 +6,7 @@ import 'search_screen.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'beach_detail_screen.dart';
 import '../models/beach.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,8 +18,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   bool isDark = false;
   int currentPageIndex = 0;
-  Location _location = Location();
-  LocationData? _currentLocation;
   late AnimationController _animationController;
 
   final List<Beach> nearbyBeaches = [
@@ -52,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -63,17 +60,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void dispose() {
     _animationController.dispose();
     super.dispose();
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
-      final locationData = await _location.getLocation();
-      setState(() {
-        _currentLocation = locationData;
-      });
-    } catch (e) {
-      print('Could not get location: $e');
-    }
   }
 
   @override
@@ -101,43 +87,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           title: const Text('Coastal Tourism App', style: TextStyle(fontWeight: FontWeight.bold)),
           elevation: 0,
           backgroundColor: Colors.transparent,
-          actions: [
-            AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _animationController.value * 2 * 3.14159,
-                  child: IconButton(
-                    icon: Icon(
-                      isDark ? Icons.dark_mode : Icons.light_mode,
-                      color: themeData.colorScheme.primary,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isDark = !isDark;
-                      });
-                      _animationController.forward(from: 0);
-                    },
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.my_location, color: themeData.colorScheme.primary),
-              onPressed: () {
-                if (_currentLocation != null) {
-                  _showLocationSnackBar();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Could not get current location'),
-                      backgroundColor: themeData.colorScheme.error,
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
         ),
         body: SafeArea(
           child: AnimatedSwitcher(
@@ -187,27 +136,35 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget getBodyContent(int index) {
     switch (index) {
       case 0:
-        return AnimationLimiter(
-          child: AnimationConfiguration.staggeredList(
-            position: 0,
-            duration: const Duration(milliseconds: 375),
-            child: SlideAnimation(
-              verticalOffset: 50.0,
-              child: FadeInAnimation(
-                child: ListView(
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    Text(
-                      'Welcome to Coastal Tourism',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 16),
-                    _buildBeachSafetyCard(),
-                    SizedBox(height: 16),
-                    _buildNearbyBeachesList(),
-                    SizedBox(height: 16),
-                    _buildWeatherForecast(),
-                  ],
+        return RefreshIndicator(
+          onRefresh: () async {
+            await Future.delayed(Duration(seconds: 1));
+            setState(() {
+              // Update data here
+            });
+          },
+          child: AnimationLimiter(
+            child: AnimationConfiguration.staggeredList(
+              position: 0,
+              duration: const Duration(milliseconds: 375),
+              child: SlideAnimation(
+                verticalOffset: 50.0,
+                child: FadeInAnimation(
+                  child: ListView(
+                    padding: EdgeInsets.all(16),
+                    children: [
+                      Text(
+                        'Welcome to Coastal Tourism',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 16),
+                      _buildBeachSafetyCard(),
+                      SizedBox(height: 16),
+                      _buildNearbyBeachesList(),
+                      SizedBox(height: 16),
+                      _buildWeatherForecast(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -249,6 +206,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             SizedBox(height: 8),
             Text('Wave height: 0.5m'),
             Text('Water temperature: 25°C'),
+            SizedBox(height: 8),
+            Text('UV Index: 6 (High)'),
+            Text('Rip current risk: Low'),
           ],
         ),
       ),
@@ -289,18 +249,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           children: [
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-              child: Image.network(
-                beach.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: beach.imageUrl,
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 120,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.image_not_supported),
-                  );
-                },
+                placeholder: (context, url) => Container(
+                  height: 120,
+                  color: Colors.grey[300],
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 120,
+                  color: Colors.grey[300],
+                  child: Icon(Icons.image_not_supported),
+                ),
+                memCacheWidth: 200,
+                memCacheHeight: 120,
+                maxWidthDiskCache: 200,
+                maxHeightDiskCache: 120,
+                fadeOutDuration: Duration(milliseconds: 300),
+                fadeInDuration: Duration(milliseconds: 300),
               ),
             ),
             Padding(
@@ -367,23 +336,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         Icon(icon),
         Text(temp),
       ],
-    );
-  }
-
-  void _showLocationSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Current location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-      ),
     );
   }
 }
