@@ -6,6 +6,7 @@ class Beach {
   final String description;
   final double latitude;
   final double longitude;
+  final String imageUrl;
 
   const Beach({
     required this.name,
@@ -13,6 +14,7 @@ class Beach {
     required this.description,
     required this.latitude,
     required this.longitude,
+    required this.imageUrl,
   });
 
   factory Beach.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class Beach {
       description: json['description'] as String? ?? '',
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
+      imageUrl: json['imageUrl'] as String? ?? '',
     );
   }
 
@@ -31,6 +34,7 @@ class Beach {
     'description': description,
     'latitude': latitude,
     'longitude': longitude,
+    'imageUrl': imageUrl,
   };
 
   Beach copyWith({
@@ -39,6 +43,7 @@ class Beach {
     String? description,
     double? latitude,
     double? longitude,
+    String? imageUrl,
   }) {
     return Beach(
       name: name ?? this.name,
@@ -46,6 +51,7 @@ class Beach {
       description: description ?? this.description,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -58,11 +64,12 @@ class Beach {
               location == other.location &&
               description == other.description &&
               latitude == other.latitude &&
-              longitude == other.longitude;
+              longitude == other.longitude &&
+              imageUrl == other.imageUrl;
 
   @override
-  int get hashCode => Object.hash(name, location, description, latitude, longitude);
+  int get hashCode => Object.hash(name, location, description, latitude, longitude, imageUrl);
 
   @override
-  String toString() => 'Beach(name: $name, location: $location, latitude: $latitude, longitude: $longitude)';
+  String toString() => 'Beach(name: $name, location: $location, latitude: $latitude, longitude: $longitude, imageUrl: $imageUrl)';
 }

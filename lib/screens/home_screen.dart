@@ -5,6 +5,8 @@ import 'messages_screen.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'beach_detail_screen.dart';
+import '../models/beach.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -19,6 +21,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Location _location = Location();
   LocationData? _currentLocation;
   late AnimationController _animationController;
+
+  final List<Beach> nearbyBeaches = [
+    Beach(
+      name: 'Varkala Beach',
+      location: 'Varkala, Kerala',
+      description: 'Varkala Beach is known for its stunning cliff-side views and serene atmosphere.',
+      latitude: 8.7378,
+      longitude: 76.7164,
+      imageUrl: 'https://example.com/varkala_beach.jpg',
+    ),
+    Beach(
+      name: 'Kovalam Beach',
+      location: 'Kovalam, Kerala',
+      description: 'Kovalam Beach is famous for its crescent-shaped beaches and lighthouse.',
+      latitude: 8.3988,
+      longitude: 76.9782,
+      imageUrl: 'https://example.com/kovalam_beach.jpg',
+    ),
+    Beach(
+      name: 'Marari Beach',
+      location: 'Mararikulam, Kerala',
+      description: 'Marari Beach offers a peaceful and less crowded beach experience.',
+      latitude: 9.5925,
+      longitude: 76.3013,
+      imageUrl: 'https://example.com/marari_beach.jpg',
+    ),
+  ];
 
   @override
   void initState() {
@@ -110,9 +139,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
           ],
         ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: getBodyContent(currentPageIndex),
+        body: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: getBodyContent(currentPageIndex),
+          ),
         ),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: (int index) {
@@ -163,23 +194,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: SlideAnimation(
               verticalOffset: 50.0,
               child: FadeInAnimation(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome to Coastal Tourism',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 16),
-                      _buildBeachSafetyCard(),
-                      SizedBox(height: 16),
-                      _buildNearbyBeachesList(),
-                      SizedBox(height: 16),
-                      _buildWeatherForecast(),
-                    ],
-                  ),
+                child: ListView(
+                  padding: EdgeInsets.all(16),
+                  children: [
+                    Text(
+                      'Welcome to Coastal Tourism',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 16),
+                    _buildBeachSafetyCard(),
+                    SizedBox(height: 16),
+                    _buildNearbyBeachesList(),
+                    SizedBox(height: 16),
+                    _buildWeatherForecast(),
+                  ],
                 ),
               ),
             ),
@@ -237,38 +265,66 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
         SizedBox(height: 8),
         SizedBox(
-          height: 120,
-          child: ListView(
+          height: 250,
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            children: [
-              _buildBeachCard('Varkala Beach', '5 km'),
-              _buildBeachCard('Kovalam Beach', '12 km'),
-              _buildBeachCard('Marari Beach', '20 km'),
-            ],
+            itemCount: nearbyBeaches.length,
+            itemBuilder: (context, index) {
+              return _buildBeachCard(nearbyBeaches[index]);
+            },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBeachCard(String name, String distance) {
+  Widget _buildBeachCard(Beach beach) {
     return Card(
       elevation: 2,
-      child: Container(
-        width: 160,
-        padding: EdgeInsets.all(8),
+      margin: EdgeInsets.only(right: 16, bottom: 8),
+      child: SizedBox(
+        width: 200,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 4),
-            Text(distance),
-            SizedBox(height: 4),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement navigation to beach details
-              },
-              child: Text('View Details'),
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+              child: Image.network(
+                beach.imageUrl,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 120,
+                    color: Colors.grey[300],
+                    child: Icon(Icons.image_not_supported),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(beach.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text(beach.location, style: TextStyle(fontSize: 12)),
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BeachDetailScreen(beach: beach),
+                        ),
+                      );
+                    },
+                    child: Text('View Details'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
