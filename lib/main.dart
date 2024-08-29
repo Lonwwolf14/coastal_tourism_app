@@ -3,12 +3,17 @@ import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
+import 'services/notification_service.dart'; // Import the notification service
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init(); // Initialize the notification service
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,12 +24,20 @@ class MyApp extends StatelessWidget {
       ),
       // Define routes
       routes: {
-        '/': (context) => HomeScreen(),
-        '/profile': (context) => ProfileScreen(),
-        '/login': (context) => LoginScreen(),
-        '/register': (context) => RegisterScreen(),
+        '/': (context) => const HomeScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
       },
       initialRoute: '/',
+      onGenerateRoute: (settings) {
+        // Handle navigation based on the notification payload
+        if (settings.name == '/notifications') {
+          // Add logic for custom routes if required
+          // Example: return MaterialPageRoute(builder: (context) => NotificationsScreen());
+        }
+        return null; // Return null if no special handling is needed
+      },
     );
   }
 }

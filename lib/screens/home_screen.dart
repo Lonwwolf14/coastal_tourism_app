@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import '../providers/beach_provider.dart';
-import '../models/beach.dart';
 import 'notifications_screen.dart';
 import 'messages_screen.dart';
-import 'profile_screen.dart'; // Import the new profile screen
-import 'widgets/search_bar.dart';
+import 'profile_screen.dart';
+import 'search_screen.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,17 +13,27 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   bool isDark = false;
-  String searchQuery = '';
   int currentPageIndex = 0;
   Location _location = Location();
   LocationData? _currentLocation;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -44,61 +52,67 @@ class _HomeScreenState extends State<HomeScreen> {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
+      colorScheme: isDark
+          ? ColorScheme.dark(
+        primary: Colors.tealAccent,
+        secondary: Colors.orangeAccent,
+        surface: Colors.grey[900]!,
+      )
+          : ColorScheme.light(
+        primary: Colors.teal,
+        secondary: Colors.orange,
+        surface: Colors.grey[100]!,
+      ),
     );
 
     return Theme(
       data: themeData,
       child: Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              Image.asset('/assets/Aldenaire.png', height: 40), // Add your logo here
-              const SizedBox(width: 10),
-              const Text('Coastal Tourism App'),
-            ],
-          ),
+          title: const Text('Coastal Tourism App', style: TextStyle(fontWeight: FontWeight.bold)),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           actions: [
-            IconButton(
-              icon: Icon(isDark ? Icons.brightness_2_outlined : Icons.wb_sunny_outlined),
-              onPressed: () {
-                setState(() {
-                  isDark = !isDark;
-                });
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _animationController.value * 2 * 3.14159,
+                  child: IconButton(
+                    icon: Icon(
+                      isDark ? Icons.dark_mode : Icons.light_mode,
+                      color: themeData.colorScheme.primary,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isDark = !isDark;
+                      });
+                      _animationController.forward(from: 0);
+                    },
+                  ),
+                );
               },
             ),
             IconButton(
-              icon: const Icon(Icons.my_location),
+              icon: Icon(Icons.my_location, color: themeData.colorScheme.primary),
               onPressed: () {
                 if (_currentLocation != null) {
-                  print('Current location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}');
+                  _showLocationSnackBar();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Could not get current location')),
+                    SnackBar(
+                      content: const Text('Could not get current location'),
+                      backgroundColor: themeData.colorScheme.error,
+                    ),
                   );
                 }
               },
             ),
           ],
         ),
-        body: Column(
-          children: [
-            if (currentPageIndex == 0)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SearchBar(
-                  hintText: 'Search beaches...',
-                  onChanged: (query) {
-                    setState(() {
-                      searchQuery = query;
-                    });
-                  },
-                  leading: const Icon(Icons.search),
-                ),
-              ),
-            Expanded(
-              child: getBodyContent(currentPageIndex),
-            ),
-          ],
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: getBodyContent(currentPageIndex),
         ),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: (int index) {
@@ -106,24 +120,31 @@ class _HomeScreenState extends State<HomeScreen> {
               currentPageIndex = index;
             });
           },
-          indicatorColor: Colors.amber,
           selectedIndex: currentPageIndex,
-          destinations: const <Widget>[
+          destinations: <Widget>[
             NavigationDestination(
-              selectedIcon: Icon(Icons.home),
               icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.notifications_sharp),
-              label: 'Community',
+              icon: Icon(Icons.notifications_outlined),
+              selectedIcon: Icon(Icons.notifications_rounded),
+              label: 'Notifications',
             ),
             NavigationDestination(
-              icon: Icon(Icons.messenger_sharp),
+              icon: Icon(Icons.search_outlined),
+              selectedIcon: Icon(Icons.search_rounded),
+              label: 'Search',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.chat_bubble_outline_rounded),
+              selectedIcon: Icon(Icons.chat_bubble_rounded),
               label: 'Messages',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person), // Profile icon
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
               label: 'Profile',
             ),
           ],
@@ -135,132 +156,176 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget getBodyContent(int index) {
     switch (index) {
       case 0:
-        return FutureBuilder<List<Beach>>(
-          future: BeachProvider.fetchBeaches(searchQuery),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No beaches found.'));
-            } else {
-              return BeachListView(beaches: snapshot.data!);
-            }
-          },
+        return AnimationLimiter(
+          child: AnimationConfiguration.staggeredList(
+            position: 0,
+            duration: const Duration(milliseconds: 375),
+            child: SlideAnimation(
+              verticalOffset: 50.0,
+              child: FadeInAnimation(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome to Coastal Tourism',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 16),
+                      _buildBeachSafetyCard(),
+                      SizedBox(height: 16),
+                      _buildNearbyBeachesList(),
+                      SizedBox(height: 16),
+                      _buildWeatherForecast(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
       case 1:
-        return const NotificationsScreen();
+        return NotificationsScreen();
       case 2:
-        return const MessagesScreen();
-      case 3: // Profile screen index
-        return const ProfileScreen(); // Navigate to ProfileScreen
+        return SearchScreen();
+      case 3:
+        return MessagesScreen();
+      case 4:
+        return ProfileScreen();
       default:
         return Container();
     }
   }
-}
 
-class BeachListView extends StatelessWidget {
-  final List<Beach> beaches;
-
-  const BeachListView({Key? key, required this.beaches}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: beaches.length,
-      itemBuilder: (context, index) {
-        final beach = beaches[index];
-        return Card(
-          elevation: 8.0,
-          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16.0),
-            leading: Icon(Icons.beach_access, color: Colors.teal),
-            title: Text(beach.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(beach.location),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BeachDetailScreen(beach: beach),
-                ),
-              );
-            },
-          ),
-        );
-      },
+  Widget _buildBeachSafetyCard() {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Beach Safety Status',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('Safe for swimming'),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text('Wave height: 0.5m'),
+            Text('Water temperature: 25°C'),
+          ],
+        ),
+      ),
     );
   }
-}
 
-class BeachDetailScreen extends StatelessWidget {
-  final Beach beach;
-
-  const BeachDetailScreen({Key? key, required this.beach}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(beach.name),
-        backgroundColor: Colors.teal,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildNearbyBeachesList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nearby Beaches',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        SizedBox(
+          height: 120,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             children: [
-              Text(
-                beach.name,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.teal, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                beach.location,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              Text(
-                beach.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.normal,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              SizedBox(
-                height: 300,
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(beach.latitude, beach.longitude),
-                    zoom: 12,
-                  ),
-                  markers: {
-                    Marker(
-                      markerId: MarkerId(beach.name),
-                      position: LatLng(beach.latitude, beach.longitude),
-                      infoWindow: InfoWindow(
-                        title: beach.name,
-                        snippet: beach.location,
-                      ),
-                      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-                    ),
-                  },
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                ),
-              ),
+              _buildBeachCard('Varkala Beach', '5 km'),
+              _buildBeachCard('Kovalam Beach', '12 km'),
+              _buildBeachCard('Marari Beach', '20 km'),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBeachCard(String name, String distance) {
+    return Card(
+      elevation: 2,
+      child: Container(
+        width: 160,
+        padding: EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 4),
+            Text(distance),
+            SizedBox(height: 4),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement navigation to beach details
+              },
+              child: Text('View Details'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherForecast() {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Weather Forecast',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildWeatherDay('Mon', Icons.wb_sunny, '30°C'),
+                _buildWeatherDay('Tue', Icons.cloud, '28°C'),
+                _buildWeatherDay('Wed', Icons.beach_access, '29°C'),
+                _buildWeatherDay('Thu', Icons.wb_sunny, '31°C'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherDay(String day, IconData icon, String temp) {
+    return Column(
+      children: [
+        Text(day),
+        Icon(icon),
+        Text(temp),
+      ],
+    );
+  }
+
+  void _showLocationSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Current location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     );
