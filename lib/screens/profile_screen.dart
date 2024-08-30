@@ -7,119 +7,153 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: Colors.teal,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text('Profile'),
+              background: Image.asset(
+                'assets/images/profile_background.jpg',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProfileHeader(),
+                  const SizedBox(height: 24.0),
+                  _buildInfoSection(context, 'Bio', 'This is a sample bio. Add more details about the user here.'),
+                  const SizedBox(height: 24.0),
+                  _buildInfoSection(context, 'Contact Information', 'Phone: +123 456 7890\nAddress: 1234 Street, City, Country'),
+                  const SizedBox(height: 24.0),
+                  _buildSocialMediaSection(context),
+                  const SizedBox(height: 32.0),
+                  _buildActionButtons(context),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
+        ),
+        const SizedBox(width: 16.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'User Name',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                'user.email@example.com',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoSection(BuildContext context, String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        Text(
+          content,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSocialMediaSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Social Media',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Profile Image
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/images/profile_placeholder.png'), // Placeholder image
-              ),
-            ),
-            const SizedBox(height: 16.0),
-
-            // Name
-            Text(
-              'User Name',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-
-            // Email
-            Text(
-              'user.email@example.com',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-
-            // Bio
-            Text(
-              'Bio: This is a sample bio. Add more details about the user here.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 32.0),
-
-            // Contact Info
-            Text(
-              'Contact Information',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Text('Phone: +123 456 7890'),
-            Text('Address: 1234 Street, City, Country'),
-            const SizedBox(height: 16.0),
-
-            // Social Media Links
-            Text(
-              'Social Media',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.facebook),
-                  onPressed: () {
-                    // Open Facebook profile
-                  },
-                ),
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.twitter),
-                  onPressed: () {
-                    // Open Twitter profile
-                  },
-                ),
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.instagram),
-                  onPressed: () {
-                    // Open Instagram profile
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 32.0),
-
-            // Buttons
-            ElevatedButton(
-              onPressed: () {
-                // Add functionality for editing profile
-              },
-              child: const Text('Edit Profile'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Add functionality for logging out
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Background color
-              ),
-              child: const Text('Log Out'),
-            ),
+            _buildSocialMediaButton(FontAwesomeIcons.facebook, Colors.blue, () {}),
+            _buildSocialMediaButton(FontAwesomeIcons.twitter, Colors.lightBlue, () {}),
+            _buildSocialMediaButton(FontAwesomeIcons.instagram, Colors.purple, () {}),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildSocialMediaButton(IconData icon, Color color, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16.0),
+      child: InkWell(
+        onTap: onPressed,
+        child: FaIcon(icon, color: color, size: 30),
       ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () {
+            // Add functionality for editing profile
+          },
+          icon: Icon(Icons.edit),
+          label: Text('Edit Profile'),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        OutlinedButton.icon(
+          onPressed: () {
+            // Add functionality for logging out
+          },
+          icon: Icon(Icons.logout, color: Colors.red),
+          label: Text('Log Out', style: TextStyle(color: Colors.red)),
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            side: BorderSide(color: Colors.red),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -17,7 +17,7 @@ class NotificationsScreen extends StatelessWidget {
     {'title': 'Ocean Temperature', 'body': 'Current ocean temperature at 28°C in Palolem Beach.'},
   ];
 
-  NotificationsScreen({Key? key}) : super(key: key);
+  NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

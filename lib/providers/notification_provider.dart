@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class NotificationProvider with ChangeNotifier {
   List<NotificationModel> _notifications = [];
   bool _isLoading = false;
-  String _apiUrl = 'https://api.example.com/notifications'; // Replace with your API URL
+  final String _apiUrl = 'https://api.example.com/notifications'; // Replace with your API URL
 
   List<NotificationModel> get notifications => _notifications;
   bool get isLoading => _isLoading;
